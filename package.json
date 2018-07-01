@@ -3,9 +3,13 @@
   "version": "0.0.1",
   "description": "A project to showcase workflows",
   "main": "index.js",
-   "repository": {
+  "repository": {
     "type": "git",
     "url": "?.git"
   },
-  "author": "Patrick Massie"
+  "author": "Patrick Massie",
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-util": "^3.0.8"
+  }
 }
