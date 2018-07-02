@@ -3,6 +3,7 @@ var gulp = require('gulp'),
     coffee = require('gulp-coffee'),
     browserify = require('gulp-browserify'),
     compass = require('gulp-compass'),
+    connect = require('gulp-connect'),
     concat = require('gulp-concat');
 
 var coffeeSources = ['components/coffee/tagline.coffee'];
@@ -13,6 +14,8 @@ var jsSources = [
   'components/scripts/template.js'
 ];
 var sassSources = ['components/sass/style.scss'];
+var htmlSources = ['builds/development/*.html'];
+var jsonSources = ['builds/development/js/*.json'];
 
 gulp.task('coffee', function() {
     return (
@@ -25,16 +28,17 @@ gulp.task('coffee', function() {
 
 gulp.task('js', function() {
     return (
-  gulp.src(jsSources)
+	gulp.src(jsSources)
     .pipe(concat('script.js'))
     .pipe(browserify())
     .pipe(gulp.dest('builds/development/js'))
-        );
+    .pipe(connect.reload())
+     );
 });
 
 gulp.task('compass', function() {
     return (
-  gulp.src(sassSources)
+	gulp.src(sassSources)
     .pipe(compass({
       sass: 'components/sass',
       image: 'builds/development/images',
@@ -42,13 +46,33 @@ gulp.task('compass', function() {
     })
     .on('error', gutil.log))
     .pipe(gulp.dest('builds/development/css'))
-        );
+    .pipe(connect.reload())
+    );
 });
 
 gulp.task('watch', function() {
   gulp.watch(coffeeSources, gulp.series('coffee'));
   gulp.watch(jsSources, gulp.series('js'));
   gulp.watch('components/sass/*.scss', gulp.series('compass'));
+  gulp.watch(htmlSources, gulp.series('html'));
+  gulp.watch(jsonSources, gulp.series('json'));
 });
 
-gulp.task('default', gulp.series('coffee', 'js', 'compass', 'watch'));
+gulp.task('connect', function() {
+   return (connect.server({
+       root: 'builds/development/',
+       livereload: true
+   })); 
+});
+
+gulp.task('html', function() {
+  return (gulp.src(htmlSources)
+    .pipe(connect.reload()));
+});
+
+gulp.task('json', function() {
+  return(gulp.src(jsonSources)
+    .pipe(connect.reload()));
+});
+
+gulp.task('default', gulp.series('coffee', 'js', 'compass', gulp.parallel('connect', 'watch')));
